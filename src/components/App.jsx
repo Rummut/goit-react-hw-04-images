@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { Searchbar } from './searchbar/Searchbar';
 import { ImageGallery } from './image-gallery/ImageGallery';
 import { Button } from './button/Button';
@@ -6,60 +6,52 @@ import { AppStyled, MainStyled } from './App.styled';
 import { FetchImages } from './api-request/Api-requst';
 import { Loader } from './loader/Loader';
 
-export class App extends Component {
-  state = {
-    values: '',
-    images: [],
-    page: 1,
-    isLoading: false,
-    total: 0,
-  };
-  changeValues = newValues => {
-    if (newValues !== '') {
-      this.setState({
-        values: newValues,
-        images: [],
-        page: 1,
-      });
-    }
-  };
-  async componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.values !== this.state.values ||
-      this.state.page !== prevState.page
-    ) {
+export const App = () => {
+  const [values, setValues] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    const fetchImages = async () => {
       try {
-        this.setState({ isLoading: true });
+        setIsLoading(true);
         const { hits, total } = await FetchImages({
-          page: this.state.page,
-          values: this.state.values,
+          page: page,
+          values: values,
         });
-        this.setState(prevState => ({
-          images: [...prevState.images, ...hits],
-          total: total,
-          isLoading: false,
-        }));
+        setImages(prevState => [...prevState, ...hits]);
+        setTotal(total);
       } catch (error) {
         console.log('error');
+      } finally {
+        setIsLoading(false);
       }
+    };
+    if (values !== '') {
+      fetchImages();
     }
-  }
+  }, [page, values]);
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const changeValues = newValues => {
+    setValues(newValues);
+    setImages([]);
+    setPage(1);
   };
 
-  render() {
-    const { images, isLoading, total } = this.state;
-    return (
-      <AppStyled>
-        <Searchbar onSubmit={this.changeValues} />
-        <MainStyled>
-          <ImageGallery imageState={images} />
-          {isLoading && <Loader />}
-          {images.length < total && <Button onClick={this.handleLoadMore} />}
-        </MainStyled>
-      </AppStyled>
-    );
-  }
-}
+  const handleLoadMore = () => {
+    setPage(prevState => prevState + 1);
+  };
+
+  return (
+    <AppStyled>
+      <Searchbar onSubmit={changeValues} />
+      <MainStyled>
+        <ImageGallery imageState={images} />
+        {isLoading && <Loader />}
+        {images.length < total && <Button onClick={handleLoadMore} />}
+      </MainStyled>
+    </AppStyled>
+  );
+};

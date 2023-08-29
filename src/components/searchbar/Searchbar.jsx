@@ -25,6 +25,7 @@ export const Searchbar = ({ onSubmit }) => {
           type="text"
           name="values"
           autoComplete="off"
+          required
           autoFocus
           placeholder="Search images and photos"
         />

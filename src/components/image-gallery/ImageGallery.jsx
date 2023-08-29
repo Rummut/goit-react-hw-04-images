@@ -1,4 +1,4 @@
-import { ImageGalleryItem } from 'components/image-gallery-item/ImageGalleryItem.hooks';
+import { ImageGalleryItem } from 'components/image-gallery-item/ImageGalleryItem';
 import { ImageGalleryList } from './ImageGallery.styled';
 
 export const ImageGallery = ({ imageState }) => {
